@@ -17,3 +17,5 @@ All contents of this repository are under an Attribution-ShareAlike-NonCommercia
 Please feel free to contact me about this work! Reading and reusing code can be made so much easier after a quick voice talk with the original author.  
 
 **--Fabrício Kury**  
+  
+Search tags: thesaurus drug class map equivalence correspondance
