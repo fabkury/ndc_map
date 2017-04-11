@@ -1,4 +1,4 @@
-#### Mapping of U.S. National Drug Codes (NDC) to Anatomical Therapeutic Chemical (ATC) Level 4 classes
+#### Mapping of U.S. Food and Drug Administration (FDA) National Drug Codes (NDC) to Anatomical Therapeutic Chemical (ATC) Level 4 classes
 ###### codename: ndc_map
   
 This script reads a file called _NDC_MASTER_INFO.csv_ with the following columns:  
