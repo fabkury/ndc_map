@@ -14,7 +14,9 @@ One same NDC can be reused, i.e. represent different drugs at different points i
   
 All contents of this repository are under an Attribution-ShareAlike-NonCommercial 4.0 International license. Please see details at http://creativecommons.org/licenses/by-nc-sa/4.0/.  
   
-Please feel free to contact me about this work! Reading and reusing code can be made so much easier after a quick voice talk with the original author. If you are unable to run the code yourself, but need a NDC-ATC4 map for your project, please contact me (see my GitHub profile).  
+Please feel free to contact me about this work! Reading and reusing code can be made so much easier after a quick voice talk with the original author.  
+  
+If you do not know the R programming language or are unable to run the code yourself for any reason, and just need a NDC-ATC4 map for your project, we should be able to do this for you (as long as you can e-mail us your list of NDCs). Contact me (see my GitHub profile).  
 
 **--Fabrício Kury**  
   
