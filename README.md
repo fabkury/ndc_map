@@ -16,7 +16,7 @@ Please feel free to contact me about this work! Reading and reusing code can be 
   
 *If you do not know the R programming language or are unable to run the code yourself for any reason, and just need a NDC-ATC4 map for your project, we should be able to do this for you (as long as you can e-mail us your list of NDCs). Contact me (see my GitHub profile).*  
 
-**--Fabrício Kury**  
+**--Fabrício Kury, postdoc at the U.S. National Library of Medicine**  
   
 Search tags: thesaurus drug class map equivalence correspondance
   
