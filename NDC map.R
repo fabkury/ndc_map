@@ -1,26 +1,31 @@
-setwd('C:/Users/kuryfs/Documents/NLM/Projects/Medicare/NDC map')
+## You must update these two lines below to run the script yourself.
+setwd('C:/Users/kuryfs/Documents/NLM/Projects/Medicare/NDC map') # Should point to the directory of the R script.
+ndc_info_file <- './Data/NDC_MASTER_INFO - Geetanjoli.csv' # Must point to the CSV file with YEAR-MONTH-NDC.
+
+# This script requires the following libraries: stringr, doParallel, XML, RCurl, RJSONIO, hash
+
 library(stringr)
 library(doParallel)
 options(scipen=999) # Disable scientific notation
 debug_mode <- F # Turn on debug mode to do quickly test the script in a small sample of the input file.
-skip_queries <- T # Set to FALSE to not query, just rebuild files generated from previous query. You will need to manually define exec_start_time
-print_stats <- T # If TRUE, will print simple statistics about the final map.
-threads_per_core <- 2 # Number of worker threads per CPU core detected by detectCores()
-output_dir <- 'Output'
+skip_queries <- F # If true, will not query the only RxNorm API, only try to assemble the files from the partial files.
+print_stats <- T # If true, will print some basic statistics of the map at the end.
+threads_per_core <- 2 # Set to 1 if you are running out of RAM when running this script.
 make.n.chunks <- function(x, n) split(x, cut(seq_along(x), n, labels = FALSE))
 curtime <- function() format(Sys.time(), "%Y_%m_%d %H_%M")
 exec_start_time <- curtime()
+output_dir <- paste0('Output/', exec_start_time)
 
 p_length <- detectCores()*threads_per_core
 
-ndc_info_file <- './Data/MASTER_NDC_INFO_2015.csv'
+if(!dir.exists(paste0(output_dir, '/Logs')))
+  dir.create(paste0(output_dir, '/Logs'), recursive = T)
 
-if(!dir.exists(paste0(output_dir, '/', exec_start_time, '/Logs')))
-  dir.create(paste0(output_dir, '/', exec_start_time, '/Logs'), recursive = T)
+if(!dir.exists(paste0(output_dir, '/Partial')))
+  dir.create(paste0(output_dir, '/Partial'), recursive = T)
 
 message('## NDC map.R: NDC mapping to ATC-4 classes')
 message('## By Fabricio Kury, March, 2016.')
-message('## Last updated: April 23rd, 2017.')
 message('## github.com/fabkury/ndc_map -- fabricio.kury@nih.gov')
 message('# This script maps National Drug Codes (NDCs) to Anatomical Therapeutic Chemical (ATC) Level 4 classes by ',
   'querying RxNav at https://rxnav.nlm.nih.gov/.\nEach NDC must be accompanied by the year and month it was used.\n')
@@ -65,8 +70,8 @@ if(!skip_queries) {
     no_atc4_logfile <- paste0(output_dir, '/Logs/', exec_label, ' No ATC4 Log.csv')
     other_error_logfile <- paste0(output_dir, '/Logs/', exec_label, ' Other Errors Log.csv')
     early_ndc_logfile <- paste0(output_dir, '/Logs/', exec_label, ' Early NDC Log.csv')
-    ndc_atc4_file <- paste0(output_dir, '/', exec_label, ' year_month_ndc_atc4.csv')
-    atc4_name_file <- paste0(output_dir, '/', exec_label, ' atc4_name.csv')
+    ndc_atc4_file <- paste0(output_dir, '/Partial/', exec_label, ' year_month_ndc_atc4.csv')
+    atc4_name_file <- paste0(output_dir, '/Partial/', exec_label, ' atc4_name.csv')
     
     message.and.log <- function(...) {
       cat(paste0('Log @ ', curtime(), ': ', ...), file=logfile, sep="\n", append=TRUE)
@@ -203,9 +208,9 @@ if(!skip_queries) {
 message('Will now merge the ', p_length, ' chunks together.')
 
 merge.files <- function(d, stem, n, unique_table = F, log_file = F) {
-  file_out <- paste0(d, '/', exec_start_time, '/', exec_start_time, ' ', stem, '.csv')
-  filein_list <- paste0(d, '/', exec_start_time, '/',
-      ifelse(log_file, 'Logs/', ''),
+  file_out <- paste0(d, '/', exec_start_time, ' ', stem, '.csv')
+  filein_list <- paste0(d, '/',
+      ifelse(log_file, 'Logs/', 'Partial/'),
       exec_start_time, ' (', 1:n, ' of ', n, ') ', stem, '.csv')
   message('Writing file "', file_out, '"...')
   con_out <- file(file_out, 'w+')
@@ -215,8 +220,8 @@ merge.files <- function(d, stem, n, unique_table = F, log_file = F) {
   else {
     writeLines(readLines(filein_list[1], 1), con_out)
     for(c in 1:n) {
-      con_in <- file(paste0(output_dir, '/', exec_start_time, '/', 
-        ifelse(log_file, 'Logs/', ''),
+      con_in <- file(paste0(output_dir, '/', 
+        ifelse(log_file, 'Logs/', 'Partial/'),
         exec_start_time, ' (', c, ' of ', n, ') ', stem, '.csv'), 'r', blocking = FALSE)
       readLines(con_in, n=1) # Skip first line, which contains the header.
       while(length(lines <- readLines(con_in, n=50000)))
@@ -229,7 +234,6 @@ merge.files <- function(d, stem, n, unique_table = F, log_file = F) {
   message('File "', file_out, '" written successfully.')
 }
 
-# Each worker thread in each core produces its own output CSV file. Now let's concatenate them.
 merge.files(output_dir, 'year_month_ndc_atc4', p_length)
 merge.files(output_dir, 'atc4_name', p_length, unique_table = T)
 merge.files(output_dir, 'No ATC4 Log', p_length, unique_table = T, log_file = T)
@@ -237,17 +241,17 @@ merge.files(output_dir, 'No RxCUI Log', p_length, unique_table = T, log_file = T
 merge.files(output_dir, 'Early NDC Log', p_length, unique_table = T, log_file = T)
 
 message('File writing completed. Will now perform large join with full original data.')
-early_ndc <- read.csv(paste0(output_dir, '/', exec_start_time, '/', exec_start_time, ' Early NDC Log.csv'))
+early_ndc <- read.csv(paste0(output_dir, '/', exec_start_time, ' Early NDC Log.csv'))
 early_ndc$EARLY_NDC <- 'Y'
 big_join <- merge(original_master_ndc, early_ndc, by = c('YEAR', 'MONTH', 'NDC'), all.x = T, all.y = T)
 big_join$EARLY_NDC <- !is.na(big_join$EARLY_NDC)
 
 big_join <- merge(big_join,
-  read.csv(paste0(output_dir, '/', exec_start_time, '/', exec_start_time, ' No ATC4 Log.csv')),
+  read.csv(paste0(output_dir, '/', exec_start_time, ' No ATC4 Log.csv')),
   by = c('YEAR', 'MONTH', 'NDC'), all.x = T, all.y = T)
 
 big_join <- merge(big_join,
-  read.csv(paste0(output_dir, '/', exec_start_time, '/', exec_start_time, ' year_month_ndc_atc4.csv')),
+  read.csv(paste0(output_dir, '/', exec_start_time, ' year_month_ndc_atc4.csv')),
   by = c('YEAR', 'MONTH', 'NDC'), all.x = T, all.y = T)
 
 big_join$EARLY_NDC[is.na(big_join$EARLY_NDC)] <- F
@@ -258,19 +262,24 @@ big_join$RXCUI.x <- NULL
 big_join$NDC <- str_pad(big_join$NDC, 11, pad = '0') # 11-digit National Drug Codes (NDCs)
 
 message('Join completed. Will now write large file.')
-write.csv(big_join, paste0(output_dir, '/', exec_start_time, '/', exec_start_time, ' ndc_rxcui_atc4.csv'),
+write.csv(big_join, paste0(output_dir, '/', exec_start_time, ' ndc_rxcui_atc4.csv'),
   row.names = F)
 
 message('Script execution completed at ', curtime(), '.')
 
 if(print_stats) {
-  message('Early NDCs: ', sum(big_join$EARLY_NDC))
-  message('Early NDCs with ATC4: ', sum(big_join$EARLY_NDC[!is.na(big_join$ATC4)]==T))
-  message('No ATC-4: ', sum(is.na(big_join$ATC4)))
-  message('With ATC-4: ', sum(!is.na(big_join$ATC4)))
-  message('NA NDCs: ', sum(is.na(big_join$NDC)))
-  message('NA RxCUIs: ', sum(is.na(big_join$RXCUI)))
-  message('With RxCUIs: ', sum(!is.na(big_join$RXCUI)))
+  print_no <- function(label, no, pr = 2)
+    message(label, no, ' (', round(100*no/unique_ndcs, pr), '%)')
+  
+  unique_ndcs <- length(unique(big_join$NDC))
+  print_no('Total NDCs: ', length(unique(big_join$NDC)))
+  print_no('Early NDCs: ', length(unique(big_join$NDC[big_join$EARLY_NDC])))
+  print_no('Early NDCs with ATC4: ', length(unique(big_join$NDC[big_join$EARLY_NDC[!is.na(big_join$ATC4)]])))
+  print_no('No ATC-4: ', length(unique(big_join$NDC[is.na(big_join$ATC4)])))
+  print_no('With ATC-4: ', length(unique(big_join$NDC[!is.na(big_join$ATC4)])))
+  print_no('NA NDCs: ', sum(is.na(big_join$NDC)))
+  print_no('NA RxCUIs: ', length(unique(big_join$NDC[is.na(big_join$RXCUI)])))
+  print_no('With RxCUIs: ', length(unique(big_join$NDC[!is.na(big_join$RXCUI)])))
   message('Unique YEAR-MONTH-NDCs: ', nrow(unique(big_join[, c('YEAR', 'MONTH', 'NDC')])))
   print(summary(big_join))
 }
