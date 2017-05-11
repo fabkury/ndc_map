@@ -1,6 +1,6 @@
 ## You must update these two lines below to run the script yourself.
 setwd('C:/Users/kuryfs/Documents/NLM/Projects/Medicare/NDC map') # Should point to the directory of the R script.
-ndc_info_file <- './Data/NDC_MASTER_INFO - Geetanjoli.csv' # Must point to the CSV file with YEAR-MONTH-NDC.
+ndc_info_file <- './Data/NDC_MASTER_INFO.csv' # Must point to the CSV file with YEAR-MONTH-NDC.
 
 # This script requires the following libraries: stringr, doParallel, XML, RCurl, RJSONIO, hash
 
