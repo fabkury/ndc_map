@@ -18,7 +18,7 @@ Please feel free to contact me about this work! Reading and reusing code can be 
   
 **_If you do not know the R programming language or are unable to run the code yourself for any reason, and just need a NDC-to-ATC4 map for your project, check the folder with FDA National Drug Code Directory ATC4 map. Otherwise, if you can send me your list of NDCs, I can run the script for you, albeit with no guarantees/warranties whatsoever (contact me -- see my GitHub profile)._**  
 
-**--Fabrício Kury, postdoc at the U.S. National Library of Medicine**  
+**--Fabrício Kury, formerly a postdoc at the U.S. National Library of Medicine**  
   
 Search tags: thesaurus drug class map equivalence correspondance classification
   
