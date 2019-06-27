@@ -3,8 +3,14 @@
 *_Mapping NDCs to Anatomical Therapeutic Chemical (ATC) Level 5, Veterans' Affairs Drug Classes, MESH Pharmacological Actions, SNOMED Clinical Terms, and other Drug Classification Systems and Terminologies_*
   
 This script provides the drug class or classes from a given drug classification system (e.g. ATC) of each FDA National Drug Code (NDC), if any is available from querying the online RxNorm API at https://rxnav.nlm.nih.gov/. The program can read the input NDCs from a flat list (e.g. TXT file, one NDC per line) or from one column in a CSV file.  
+  
 If ATC level 5 is requested, the script will additionally scrape each code's Administration Route, Defined Daily Dose (DDD), and Note (if any) from the official ATC index at https://whocc.no/atc_ddd_index/.  
-It is also possible to request just the generic active ingredients of the NDC (which is independently of drug classification systems), the SNOMED CT (Clinical Terms) code, and the MESH Pharmacological Actions code. Requesting multiple types of codes at once is possible, but not recommended because it leads to duplication of entries.  
+  
+It is also possible to request:  
+- just the generic active ingredients of the NDC, which is independent of drug classification systems,  
+- the SNOMED CT (Clinical Terms) code corresponding to the NDC,  
+- the MESH Pharmacological Actions code corresponding to the NDC.  
+Requesting multiple types of codes at once is possible, but not recommended because it leads to duplication of entries.  
   
 This script should work out-of-the-box if you follow the instructions in the .R  file under the heading "How to execute this script." There are still pending tasks -- see the TODOs in the .R file.
   
