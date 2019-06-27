@@ -10,6 +10,7 @@ It is also possible to request:
 - just the generic active ingredients of the NDC, which is independent of drug classification systems,  
 - the SNOMED CT (Clinical Terms) code corresponding to the NDC,  
 - the MESH Pharmacological Actions code corresponding to the NDC.  
+  
 Requesting multiple types of codes at once is possible, but not recommended because it leads to duplication of entries.  
   
 This script should work out-of-the-box if you follow the instructions in the .R  file under the heading "How to execute this script." There are still pending tasks -- see the TODOs in the .R file.  
