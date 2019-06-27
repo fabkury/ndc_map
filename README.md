@@ -1,4 +1,4 @@
-#### Mapping of U.S. Food and Drug Administration (FDA) National Drug Codes (NDC) to Drug Classes  
+#### Mapping of U.S. Food and Drug Administration (FDA) National Drug Codes (NDC) to Drug Classes and Codes  
 ###### codename: ndc_map
 *_Mapping NDCs to Anatomical Therapeutic Chemical (ATC) Level 5, Veterans' Affairs Drug Classes, MESH Pharmacological Actions, SNOMED Clinical Terms, and other Drug Classification Systems and Terminologies_*
   
