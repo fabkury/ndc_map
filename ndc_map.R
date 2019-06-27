@@ -172,8 +172,8 @@ ndc_master_file <- paste0('C:/Users/', Sys.getenv("USERNAME"),
   '/OneDrive/IB/NLM/Projetos/ndc_map/ATC-4 (antigo)/Data/NDC2017.csv') # Source data with NDCs.
 ndc_master_file_separator <- ',' # Character used to separate columns in the ndc_master_file.
 
-do_atc5 <- FALSE # If true, will request Anatomical-Therapeutic-Chemical (ATC) level 5 from RxNorm.
-do_atc4 <- TRUE # If true, will request Anatomical-Therapeutic-Chemical (ATC) level 4 from RxClass.
+do_atc5 <- TRUE # If true, will request Anatomical-Therapeutic-Chemical (ATC) level 5 from RxNorm.
+do_atc4 <- FALSE # If true, will request Anatomical-Therapeutic-Chemical (ATC) level 4 from RxClass.
 do_va <- FALSE # If true, will request Veterans' Affairs Drug Classes from RxNorm.
 do_attributes <- FALSE # If true, will request the drug's attributes (brand/generic, strength).
 do_snomedct <- FALSE # If true, will request SNOMED CT from RxNorm.
@@ -182,9 +182,9 @@ do_ingredients <- FALSE # If true, will request the drug's ingredients from RxNo
 # Ingredients are required for the classes below, so let's make sure do_ingredients is on.
 do_ingredients <- do_ingredients | do_atc5 | do_snomedct | do_meshpa
 
-exec_label <- 'atc5 v6' # Can be anything. This is just to isolate multiple runs of the script.
+exec_label <- 'atc5' # Can be anything. This is just to isolate multiple runs of the script.
 
-debug_mode <- T # If true, will use only a small portion of input data.
+debug_mode <- F # If true, will use only a small portion of input data.
 debug_limit <- 1000 # Number of entries to use in debug mode.
 if(debug_mode)
   exec_label <- paste0(exec_label, '_d')
