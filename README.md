@@ -1,28 +1,33 @@
-#### Mapping of U.S. Food and Drug Administration (FDA) National Drug Codes (NDC) to Anatomical Therapeutic Chemical (ATC) Level 4 classes
+#### Mapping of U.S. Food and Drug Administration (FDA) National Drug Codes (NDC) to Drug Classes and Codes  
 ###### codename: ndc_map
+*_Mapping NDCs to Anatomical Therapeutic Chemical (ATC) Level 5, Veterans' Affairs Drug Classes, MESH Pharmacological Actions, SNOMED Clinical Terms, and other Drug Classification Systems and Terminologies_*
   
-This script reads a file called _NDC_MASTER_INFO.csv_ with the following columns:  
-**"YEAR", "MONTH", "NDC"**  
-and outputs a file called _ndc_atc_long_list.csv_ containing the following columns:  
-**"YEAR", "MONTH", "NDC", "RXCUI", "ATC4"**  
-as well as another file called atc_name.csv with the following columns:  
-**"ATC4", "ATC4_NAME"**  
-
-The script maps each NDC, according to the date it was used (year and month), to all its ATC-4 classes (if any is available) by querying the RxNav API at https://rxnav.nlm.nih.gov/. The algorithm uses parallelization and query caching to greatly improve efficiency. At my 8-cores desktop computer, I mapped 2.1 million YEAR-MONTH-NDC rows to 3.33 million YEAR-MONTH-NDC-RXCUI-ATC4 rows in 65 minutes.  
+This script provides the drug class or classes from a given drug classification system (e.g. ATC) of each FDA National Drug Code (NDC), if any is available from querying the online RxNorm API at https://rxnav.nlm.nih.gov/. The program can read the input NDCs from a flat list (e.g. TXT file, one NDC per line) or from one column in a CSV file.  
   
-This work was presented as a poster at the 2017 Annual Symposium of AMIA (American Medical Informatics Association). If you are going to use this script, please take some time to understand the numbers contained in the poster (the PDF is in this repository), because they CAN affect data analysis done using the NDC-to-ATC map. For a deeper analysis and comparison of drug classification systems, we have also published a paper: https://mor.nlm.nih.gov/pubs/pdf/2016-dmmi-fk.pdf  
+If ATC level 5 is requested, the script will additionally scrape each code's Administration Route, Defined Daily Dose (DDD), and Note (if any) from the official ATC index at https://whocc.no/atc_ddd_index/.  
   
-All contents of this repository are under an Attribution-ShareAlike-NonCommercial 4.0 International license. Please see details at http://creativecommons.org/licenses/by-nc-sa/4.0/.  
+It is also possible to request:  
+- just the generic active ingredients of the NDC, which is independent of drug classification systems,  
+- the SNOMED CT (Clinical Terms) code corresponding to the NDC,  
+- the MESH Pharmacological Actions code corresponding to the NDC.  
+Requesting multiple types of codes at once is possible, but not recommended because it leads to duplication of entries.  
   
-Please feel free to contact me about this work! Reading and reusing code can be made so much easier after a quick voice talk with the original author.  
+This script should work out-of-the-box if you follow the instructions in the .R  file under the heading "How to execute this script." There are still pending tasks -- see the TODOs in the .R file.  
   
-**_If you do not know the R programming language or are unable to run the code yourself for any reason, and just need a NDC-to-ATC4 map for your project, check the FDA National Drug Code Directory ATC4 maps already available here in two versions: March, 2018 and March, 2019. Otherwise, if you can send me your list of NDCs, I can run the script for you, albeit with no guarantees/warranties whatsoever. Just contact me, you can find my email at https://directory.columbia.edu/people/uni?code=fk2374, or reach me via LinkedIn._**  
-**--Fabrício Kury, formerly a postdoc at the U.S. National Library of Medicine**  
+This work is an **update** from what was presented as a poster at the 2017 Annual Symposium of the American Medical Informatics Association (AMIA). Still, if you are going to use this script or these pre-built NDC <-> drug class maps, please take time to understand the numbers contained in the poster (PDFs are in this repository), because they CAN affect data analyses. I have also published a deeper analysis and comparison of drug classification systems in a paper (https://mor.nlm.nih.gov/pubs/pdf/2016-dmmi-fk.pdf) but **_tl;dr_**: unless your use case is particularly specialized, ATC is the best drug classification for most cases of large dataset analyses. The Veterans' Affairs Drug Classes attain the same high level of coverage of NDCs as ATC, but they don't provide the accessible hierarchy that ATC does.  
+  
+**About performance**  
+The RxNav API Terms of Service requires users to make no more than 20 requests per second per IP address (https://rxnav.nlm.nih.gov/TermOfService.html). The script will cache its internet calls, so it works faster as more NDCs have already been mapped. Notwithstanding, from my experience on my laptop over good wi-fi, one should expect about 12 to 18 hours of execution time per 100,000 unique NDCs, which means no more than about 1.5 NDC per second.  
+  
+All contents of this repository are under an Attribution-ShareAlike-NonCommercial 4.0 International license. Please see details at http://creativecommons.org/licenses/by-nc-sa/4.0/. Please feel free to contact me about this work! Reading and reusing code can be made so much easier after a quick talk with the original author.  
+  
+**_If you do not know the R programming language or are unable to run the code yourself for any reason, and just need a NDC-to-drug class map for your project, see the folder "FDA NDC Database File with ATC4". It contains all NDCs from the FDA database with their available mappings. Otherwise, if you can send me your list of NDCs, I can run the script for you. Contact me at 627@kury.dev.**  
+**--Fabrício Kury**  
   
 Search tags: thesaurus drug class map equivalence correspondance classification
   
-#### Why do I need the year and month the NDC was used?  
-One same NDC can be reused, i.e. represent different drugs at different points in time (https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfcfr/CFRSearch.cfm?fr=207.35, paragraph 4.ii). This regulation might be changed in 2017 (with tolerance period until 2019, see https://www.fda.gov/Drugs/GuidanceComplianceRegulatoryInformation/DrugRegistrationandListing/ucm2007058.htm), but old data will remain potentially ambiguous. If you do not have the year and month that each NDC was truly used (e.g. the date the drug was dispensed), the least wrong way to use this script might be to assign to all NDCs the year and month you are executing the script. This will attribute to each NDC its most recent ATC-4 class(es).
-
-#### Can I get ATC-5? Or other drug classification systems?
-It is possible to obtain ATC-5, but it requires a different path along the RxNorm resources and IDs; namely, one needs to map the RxNorm CUI of the medication to its ingredients, then request the ATC-5 of each one. It is also possible to request other drug/pharmaceutical classification systems besides ATC. These functionalities are possible but are not currently implemented in this script. If you want to implement them yourself, please refer to the RxNorm documentation for orientation: https://rxnav.nlm.nih.gov/  
+#### Do I need the year and month the NDC was used?  
+One same NDC can have been reused, i.e. represented different drugs at different points in time: https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfcfr/CFRSearch.cfm?fr=207.35, paragraph 4.ii; regulation changed in 2017: https://www.fda.gov/Drugs/GuidanceComplianceRegulatoryInformation/DrugRegistrationandListing/ucm2007058.htm. However, as far as I have witnessed such situation is exceedingly rare.  
+From the perspective of RxNorm, each NDC has a history of zero or any number of RxCUIs that correspond or have corresponded to them during some period. Over time RxCUIs are also updated and re-structured, with some containing mappings to drug classes and some not.  
+This means that most NDCs correspond, conceptually, to the same drug product (active ingredients and packaging) during its entire presence in the databaset, even if that "conceptual" drug product might have had different RxCUIs over time. So, if your intent is to find RxCUIs holding mappings to a given terminology or drug classification system, you probably want to make your choice of RxCUI for each NDC contingent on whether it has your desidred mapping(s).   
+  
