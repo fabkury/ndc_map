@@ -7,7 +7,9 @@ This script provides the drug class or classes from a given drug classification 
 If ATC level 5 is requested, the script will additionally scrape each code's Administration Route, Defined Daily Dose (DDD), and Note (if any) from the official ATC index at https://whocc.no/atc_ddd_index/.  
   
 It is also possible to request:  
-- just the generic active ingredients of the NDC, which is independent of drug classification systems,  
+- the generic active ingredients of the NDC, which are independent of drug classification systems,  
+- whether the NDC is a brand name or a generic,  
+- the strength of the drug product (as an unstructured text string),  
 - the SNOMED CT (Clinical Terms) code corresponding to the NDC,  
 - the MESH Pharmacological Actions code corresponding to the NDC.  
   
