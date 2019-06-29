@@ -8,11 +8,7 @@
 ##
 
 #' HOW TO RUN THIS SCRIPT:
-<<<<<<< HEAD
 #' First, make sure the code_master_file variable is pointing to the input file containing NDCs. That
-=======
-#' First, make sure the ndc_master_file variable is pointing to the input file containing NDCs. That
->>>>>>> b339143761316c12dc88dc06acb4aea61542bb25
 #' file can be either:
 #'   - the package.txt from the FDA (https://www.fda.gov/Drugs/InformationOnDrugs/ucm142438.htm),
 #'   - a CSV file containing a column called "NDC",
@@ -30,30 +26,16 @@
 #'   https://www.nlm.nih.gov/research/umls/rxnorm/docs/2012/appendix3.html
 #' TODO: Each specialized mapping function, eg. get_atc5(), should receive clear arguments. The
 #' work of joining or column-binding their return values with the rest of the NDC information should
-<<<<<<< HEAD
 #' be performed by get_code_classes().
-=======
-#' be performed by get_ndc_classes().
->>>>>>> b339143761316c12dc88dc06acb4aea61542bb25
 #' TODO: Make the query caching happen at the level of the web request call, not anywhere higher up.
 #' TODO: Report to the final map whether the RxCUI is active or not.
 
 
 # Packages ------------------------------------------------------------------------------------
 library(data.table)
-<<<<<<< HEAD
 library(tidyverse)
 library(xml2)
 library(hash)
-=======
-library(stringr)
-library(tibble)
-library(dplyr)
-library(readr)
-library(xml2)
-library(hash)
-library(purrr)
->>>>>>> b339143761316c12dc88dc06acb4aea61542bb25
 library(ratelimitr)
 
 # Backbone functions --------------------------------------------------------------------------
@@ -74,14 +56,6 @@ chop_tbl <- function(tbl, n_chops = 0, size = 0) {
   # Chop by size of the chop
   split(tbl, cut(1:nrow(tbl), ceiling(nrow(tbl)/size), labels = FALSE))
 }
-<<<<<<< HEAD
-=======
-
-chop_tbl_to_size <- function(tbl, size) {
-  
-}
-
->>>>>>> b339143761316c12dc88dc06acb4aea61542bb25
 ifzero <- function(o) {
   if(length(o))
     o
@@ -182,7 +156,6 @@ tbl_by_row <- function(data, fun) {
 
 
 # Globals -------------------------------------------------------------------------------------
-<<<<<<< HEAD
 # Set working directory to the .R script directory.
 options(stringsAsFactors = F)
 tryCatch(setwd(dirname(sys.frame(1)$ofile)),
@@ -199,23 +172,11 @@ ndc_master_file_separator <- ','
 # Request codes by making the do_* variables TRUE.
 do_atc5 <- FALSE # If true, will request Anatomical-Therapeutic-Chemical (ATC) level 5 from RxNorm.
 do_atc4 <- TRUE # If true, will request Anatomical-Therapeutic-Chemical (ATC) level 4 from RxClass.
-=======
-setwd(paste0('C:/Users/', Sys.getenv("USERNAME"), '/OneDrive/IB/NLM/Projetos/ndc_map/R'))
-options(stringsAsFactors = F)
-
-ndc_master_file <- paste0('C:/Users/', Sys.getenv("USERNAME"),
-  '/OneDrive/IB/NLM/Projetos/ndc_map/ATC-4 (antigo)/Data/NDC2017.csv') # Source data with NDCs.
-ndc_master_file_separator <- ',' # Character used to separate columns in the ndc_master_file.
-
-do_atc5 <- TRUE # If true, will request Anatomical-Therapeutic-Chemical (ATC) level 5 from RxNorm.
-do_atc4 <- FALSE # If true, will request Anatomical-Therapeutic-Chemical (ATC) level 4 from RxClass.
->>>>>>> b339143761316c12dc88dc06acb4aea61542bb25
 do_va <- FALSE # If true, will request Veterans' Affairs Drug Classes from RxNorm.
 do_attributes <- FALSE # If true, will request the drug's attributes (brand/generic, strength).
 do_snomedct <- FALSE # If true, will request SNOMED CT from RxNorm.
 do_meshpa <- FALSE # If true, will request MESH Pharmacological Actions from RxNorm.
 do_ingredients <- FALSE # If true, will request the drug's ingredients from RxNorm.
-<<<<<<< HEAD
 
 # Ingredients are required for the classes below, so let's make sure do_ingredients is on.
 do_ingredients <- do_ingredients | do_atc5 | do_snomedct | do_meshpa
@@ -240,31 +201,10 @@ ndc_map_random_seed <- 511 # Magic number, intentionally so.
 # Debug mode ----------------------------------------------------------------------------------
 debug_mode <- T # If true, will use only a small portion of input data.
 debug_limit <- 250 # Number of entries to use in debug mode.
-=======
-# Ingredients are required for the classes below, so let's make sure do_ingredients is on.
-do_ingredients <- do_ingredients | do_atc5 | do_snomedct | do_meshpa
-
-exec_label <- 'atc5' # Can be anything. This is just to isolate multiple runs of the script.
-
-debug_mode <- F # If true, will use only a small portion of input data.
-debug_limit <- 1000 # Number of entries to use in debug mode.
->>>>>>> b339143761316c12dc88dc06acb4aea61542bb25
 if(debug_mode)
   exec_label <- paste0(exec_label, '_d')
 global_rds_override <- F
 global_rds_ignore <- F
-<<<<<<< HEAD
-=======
-out_base_dir <- ensureDir('../Output/')
-out_dir <- ensureDir(out_base_dir, exec_label, '/')
-def_rds_dir <- ensureDir(out_base_dir, 'rds/')
-ndc_field <- 'ndc' # ndc field (column)
-ndc_map_random_seed <- 511 # Magic number, intentionally so.
-error_retry_limit <- 5 # Number of times to retry after error before aborting the whole script.
-error_sleep_seconds <- 10 # Number of seconds to sleep between retries after error.
-RxNorm_query_rate_limit <- 19 # The documentation (https://rxnav.nlm.nih.gov/TermOfService.html)
-  # allows no more than 20/sec. Let's do 19/sec just to be sure.
->>>>>>> b339143761316c12dc88dc06acb4aea61542bb25
 
 
 # Application-specific functions --------------------------------------------------------------
@@ -585,11 +525,7 @@ get_snomedct <- function(drug_product) {
   cbind(as.data.frame(as.list(drug_product)), snomedct)
 }
 
-<<<<<<< HEAD
 get_code_classes <- function(ndc, attributes = do_attributes, va = do_va,
-=======
-get_ndc_classes <- function(ndc, attributes = do_attributes, va = do_va,
->>>>>>> b339143761316c12dc88dc06acb4aea61542bb25
   ingredients = do_ingredients, atc5 = do_atc5, atc4 = do_atc4, snomedct = do_snomedct,
   meshpa = do_meshpa, ndc_to_rxcui_fun = get_RxCUI_from_ndcstatus) {
   # Get the ndc's RxCUI
@@ -659,7 +595,6 @@ options(expressions = 5e5)
 
 # Load and preprocess input -----------------------------------------------------------------
 # Read the master list of ndcs
-<<<<<<< HEAD
 console('Will read ', ndc_master_file, ' file.')
 wrapRDS(ndc_master, {
   ndc_master_line_1 <- read_lines(ndc_master_file, n_max = 1)
@@ -675,25 +610,6 @@ wrapRDS(ndc_master, {
   } else
     master_source <- tibble(read_lines(ndc_master_file)) # Assume the file is a flat list of NDCs.
     # If the first line contains "NDC" (case-insensitive), assume it is the header and skip it.
-=======
-if(T) {
-  console('Will read ', ndc_master_file, ' file.')
-  ndc_master_line_1 <- read_lines(ndc_master_file, n_max = 1)
-  if(grepl('NDCPACKAGECODE', ndc_master_line_1, fixed = T))
-    # Assume the file is the package.txt file from the FDA NDC Directory.
-    master_source <- read_delim(ndc_master_file, delim = '\t', col_names = TRUE,
-      col_types = cols_only(NDCPACKAGECODE = "c"), n_max = ifelse(debug_mode, debug_limit, Inf))
-  else if(grepl('ndc', tolower(ndc_master_line_1), fixed = T)) {
-    #' Assume the file is a character-delimited tabular file, with colum headers, containing a
-    #' column called "NDC" (or some other name containing "NDC" such as "NDC_CODE").
-    master_source <- read_delim(ndc_master_file, delim = ndc_master_file_separator, col_names = TRUE,
-      n_max = ifelse(debug_mode, debug_limit, Inf))
-  }
-  else
-    # Assume the file is a flat list of NDCs.
-    # If the first line contains "NDC" (case-insensitive), assume it is the header and skip it.
-    master_source <- tibble(read_lines(ndc_master_file))
->>>>>>> b339143761316c12dc88dc06acb4aea61542bb25
   remove(ndc_master_line_1)
   
   #' Rename to 'ndc', in lowercase, as is the standard chosen for this script.
@@ -701,7 +617,6 @@ if(T) {
   
   #' Pick the first occurrence of the NDC in the column names, in case there are multiple columns
   #' with 'NDC' in the name.
-<<<<<<< HEAD
   master_source_ndc_column <- min(which(grepl('ndc', names(master_source), fixed = T)))
   ndc_master <- master_source[master_source_ndc_column]
   names(ndc_master) <- ndc_field
@@ -713,23 +628,6 @@ if(is_tibble(ndc_master)) {
   console('Read ', nrow(ndc_master), ' rows from ', ndc_master_file, '.')
 } else
   stop('Error: unable read input file. Please read the description of acceptable input.')
-=======
-  ndc_master <- master_source[, min(which(grepl('ndc', names(master_source), fixed = T)))]
-  
-  # By now we should have a tibble with a single column.
-  if(!is_tibble(ndc_master))
-    stop('Error: unable read input file. Please read the description of acceptable input.')
-  names(ndc_master) <- ndc_field
-  console('Read ', nrow(ndc_master), ' rows from ', ndc_master_file, '.')
-  # Create lpc: "Labeler-product," first two segments of ndc.
-  console("Will extract the first two segments of each ndc (labeler and product), which I have ",
-    'dubbed "LPC". The third segment one does not impact drug class mapping; it is just the ',
-    'packaging (not to be confused with dose form).')
-  ndc_master$lpc <- get_labeler_product_from_ndc(ndc_master[, ndc_field])
-  console('Found ', length(unique(ndc_master$lpc)), ' unique LPCs.')
-  keepRDS(ndc_master)
-}
->>>>>>> b339143761316c12dc88dc06acb4aea61542bb25
 
 # Subset for debugging?
 if(debug_mode) {
@@ -740,7 +638,6 @@ if(debug_mode) {
   message('Done.')
 }
 
-<<<<<<< HEAD
 if(F) {
   selected_entries <- nchar(ndc_master[[ndc_field]]) < 7
   if(any(selected_entries)) {
@@ -769,11 +666,6 @@ if(F) {
 #' the ndc_master.
 code_master <- unique(ndc_master[[ndc_field]])
 console('Found ', length(code_master), ' unique NDCs.')
-=======
-#' Make lpc_master the one that will actually be used for mapping. The results get later joined
-#' to the ndc_master.
-lpc_master <- unique(ndc_master$lpc)
->>>>>>> b339143761316c12dc88dc06acb4aea61542bb25
 
 
 # Produce the map -----------------------------------------------------------------------------
@@ -821,11 +713,7 @@ if(T) {
   }
   
   #' This function wrapper below is used to cap the number of queries to RxNorm per second. The
-<<<<<<< HEAD
   #' functions inside get_code_classes() use this paste0 instead of the standard one to assemble the
-=======
-  #' functions inside get_ndc_classes() use this paste0 instead of the standard one to assemble the
->>>>>>> b339143761316c12dc88dc06acb4aea61542bb25
   #' query strings (web addresses). In addition, for convenience, it also adds the base address.
   paste0RxNormQuery <- limit_rate(function(...) {
       paste0('https://rxnav.nlm.nih.gov/REST/', ...)
@@ -833,7 +721,6 @@ if(T) {
   
   i <- as.integer(0)
   error_retry_count <- 0
-<<<<<<< HEAD
   code_count <- length(code_master)
   code_map <- vector("list", code_count)
   beginProgressReport(code_count)
@@ -843,49 +730,23 @@ if(T) {
     code <- code_master[[i]]
     tryCatch({
       code_map[[i]] <- get_code_classes(code)
-=======
-  lpc_count <- length(lpc_master)
-  lpc_map <- vector("list", lpc_count)
-  beginProgressReport(lpc_count)
-  while(i < lpc_count) {
-    i <- i + 1
-    iterateProgress(update_all_rds)
-    # As far as I could verify, RxNorm is indifferent about receiving only the first two
-    # segments of an ndc (i.e. an lpc), or its entirety.
-    lpc <- lpc_master[[i]]
-    tryCatch({
-      lpc_map[[i]] <- get_ndc_classes(lpc)
->>>>>>> b339143761316c12dc88dc06acb4aea61542bb25
       error_retry_count <<- 0
       }, error = function(e) {
         error_retry_count <<- error_retry_count + 1
         if(error_retry_count < error_retry_limit) {
           message('Error: ', e)
-<<<<<<< HEAD
           message('Will retry code ', code, '.')
           i <<- i - 1
         }
         else if(error_retry_count == error_retry_limit) {
           message('WARNING: Retry limit reached. Will move to the next code.')
-=======
-          message('Will retry LPC ', lpc, '.')
-          i <<- i - 1
-        }
-        else if(error_retry_count == error_retry_limit) {
-          message('WARNING: Retry limit reached. Will move to the next LPC.')
->>>>>>> b339143761316c12dc88dc06acb4aea61542bb25
           Sys.sleep(error_sleep_seconds)
           error_retry_count <- 0
         }
       }
     )
   }
-<<<<<<< HEAD
   code_map <- bind_rows(code_map)
-=======
-  lpc_map <- bind_rows(lpc_map)
-  lpc_map <- rename(lpc_map, lpc = ndc)
->>>>>>> b339143761316c12dc88dc06acb4aea61542bb25
   remove(i)
   remove(paste0RxNormQuery)
   update_all_rds()
@@ -893,14 +754,9 @@ if(T) {
 
 # Join the map to the original ndc master table
 if(T) {
-<<<<<<< HEAD
   browser()
   ndc_map <- left_join(ndc_master, code_map, by = 'ndc')
   remove(ndc_master)
-=======
-  ndc_map <- left_join(master_source, lpc_map, by = c('ndc' = 'lpc'))
-  ndc_map$lpc <- NULL # No longer needed.
->>>>>>> b339143761316c12dc88dc06acb4aea61542bb25
   ndc_map <- ndc_map[order(ndc_map[[ndc_field]]),]
 }
 
@@ -932,9 +788,5 @@ options(expressions = old_option_expressions)
 remove(old_option_expressions)
 exec_end_time <- Sys.time()
 console('Script execution completed at ', timeformat(exec_end_time), '. ')
-<<<<<<< HEAD
 print(round(exec_end_time-exec_start_time, 1))
 
-=======
-print(exec_end_time-exec_start_time)
->>>>>>> b339143761316c12dc88dc06acb4aea61542bb25
