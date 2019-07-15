@@ -27,7 +27,7 @@ The RxNav API Terms of Service requires users to make no more than 20 requests p
 All contents of this repository are under an Attribution-ShareAlike-NonCommercial 4.0 International license. Please see details at http://creativecommons.org/licenses/by-nc-sa/4.0/. Please feel free to contact me about this work! Reading and reusing code can be made so much easier after a quick talk with the original author.  
   
 #### Pre-made NDC-to-drug class maps
-If you do not know the R programming language or are unable to run the code yourself for any reason, and just need a NDC-to-drug class map for your project, see the folder "FDA NDC Database File with ATC4". It contains all NDCs from the FDA database with their available mappings.  
+If you do not know the R programming language or are unable to run the code yourself for any reason, and just need a NDC-to-drug class map for your project, see the folder "FDA NDC Database File with ATC4". It contains all NDCs from the FDA database (https://www.fda.gov/drugs/drug-approvals-and-databases/national-drug-code-directory) with pre-joined mappings.  
 Otherwise, if you can send me your list of NDCs, I can run the script for you. Contact me at 627@kury.dev. **_--Fabrício Kury_**  
   
 Search tags: thesaurus drug class map equivalence correspondance classification
