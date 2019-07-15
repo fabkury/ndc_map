@@ -1,4 +1,4 @@
-#### Mapping U.S. Food and Drug Administration (FDA) National Drug Codes (NDC) to Drug Classes and Codes  
+### Mapping U.S. Food and Drug Administration (FDA) National Drug Codes (NDC) to Drug Classes and Codes  
 ###### codename: ndc_map
 *_Mapping NDCs to Anatomical Therapeutic Chemical (ATC) Level 5, Veterans' Affairs Drug Classes, MESH Pharmacological Actions, SNOMED Clinical Terms, and other Drug Classification Systems and Terminologies_*
   
@@ -13,19 +13,22 @@ It is also possible to request:
 - the SNOMED CT (Clinical Terms) code corresponding to the NDC,  
 - the MESH Pharmacological Actions code corresponding to the NDC.  
   
-Requesting multiple types of codes at once is possible, but not recommended because it leads to duplication of entries.  
+This work is an update from what was presented as a poster at the 2017 Annual Symposium of the American Medical Informatics Association (AMIA). Still, if you are going to use this script or its NDC <-> drug class maps, please take time to understand the numbers contained in the poster (PDFs are in this repository), because they CAN affect data analyses.  
   
-This script should work out-of-the-box if you follow the instructions in the .R  file under the heading "How to execute this script." There are still pending tasks -- see the TODOs in the .R file.  
+I have also published a deeper analysis and comparison of drug classification systems in a paper (https://mor.nlm.nih.gov/pubs/pdf/2016-dmmi-fk.pdf). **_TL;DR_**: unless your use case is particularly specialized, ATC is the best drug classification for most cases of large dataset analyses. The Veterans' Affairs Drug Classes attain the same high level of coverage of NDCs as ATC, but they don't provide the accessible hierarchy that ATC does.  
   
-This work is an **update** from what was presented as a poster at the 2017 Annual Symposium of the American Medical Informatics Association (AMIA). Still, if you are going to use this script or these pre-built NDC <-> drug class maps, please take time to understand the numbers contained in the poster (PDFs are in this repository), because they CAN affect data analyses. I have also published a deeper analysis and comparison of drug classification systems in a paper (https://mor.nlm.nih.gov/pubs/pdf/2016-dmmi-fk.pdf) but **_tl;dr_**: unless your use case is particularly specialized, ATC is the best drug classification for most cases of large dataset analyses. The Veterans' Affairs Drug Classes attain the same high level of coverage of NDCs as ATC, but they don't provide the accessible hierarchy that ATC does.  
+#### How to run the script
+This script should work out of the box if you follow the instructions in the .R  file under the heading "How to execute this script." There is still extra code to write -- see the TODOs in the .R file.  
   
-**About performance**  
+#### About performance
 The RxNav API Terms of Service requires users to make no more than 20 requests per second per IP address (https://rxnav.nlm.nih.gov/TermOfService.html). The script will cache its internet calls, so it works faster towards the end as more NDCs map to RxCUIs that have already appeared before. But still, from my experience on a laptop over good wi-fi, one should expect 12 to 18 hours of execution time per 100,000 unique NDCs, which means about 1.5 to 2 NDCs per second. If execution is interrupted (intentionally or not), next time you run the script it will start from zero again, but the queries will still be cached (stored in RDS files) so it will progress quite fast from the beginning, until it reaches entires requiring novel online queries at the point it had been interrupted.
   
+#### License
 All contents of this repository are under an Attribution-ShareAlike-NonCommercial 4.0 International license. Please see details at http://creativecommons.org/licenses/by-nc-sa/4.0/. Please feel free to contact me about this work! Reading and reusing code can be made so much easier after a quick talk with the original author.  
   
-**_If you do not know the R programming language or are unable to run the code yourself for any reason, and just need a NDC-to-drug class map for your project, see the folder "FDA NDC Database File with ATC4". It contains all NDCs from the FDA database with their available mappings. Otherwise, if you can send me your list of NDCs, I can run the script for you. Contact me at 627@kury.dev._**  
-**--Fabrício Kury**  
+#### Pre-made NDC-to-drug class maps
+If you do not know the R programming language or are unable to run the code yourself for any reason, and just need a NDC-to-drug class map for your project, see the folder "FDA NDC Database File with ATC4". It contains all NDCs from the FDA database with their available mappings.  
+Otherwise, if you can send me your list of NDCs, I can run the script for you. Contact me at 627@kury.dev. **_--Fabrício Kury_**  
   
 Search tags: thesaurus drug class map equivalence correspondance classification
   
