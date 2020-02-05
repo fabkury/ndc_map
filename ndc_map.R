@@ -283,8 +283,11 @@ get_RxCUI_from_ndcstatus <- function(ndc, ndc_path = list()) {
       
       rxcui <- with(ndcHistory, ifelse(is.na(activeRxcui), originalRxcui, activeRxcui))
       rxcui <- as.integer(rxcui)
-      if(length(rxcui)>1)
-        browser()
+      # if(length(rxcui)>1)
+      # This is never supposed to happen, and honestly I don't remember ever seeing it happen,
+      # but since the code does assume that length(rxcui) == 1, for the sake of safety I should
+      # implement this check and have it raise a non-halting error.
+      #   browser()
     }
     else {
       # No NDC history. Try to use what was specified under ndcStatus directly.
@@ -754,7 +757,6 @@ if(T) {
 
 # Join the map to the original ndc master table
 if(T) {
-  browser()
   ndc_map <- left_join(ndc_master, code_map, by = 'ndc')
   remove(ndc_master)
   ndc_map <- ndc_map[order(ndc_map[[ndc_field]]),]
