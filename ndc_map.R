@@ -199,7 +199,7 @@ ndc_map_random_seed <- 511 # Magic number, intentionally so.
 
 
 # Debug mode ----------------------------------------------------------------------------------
-debug_mode <- T # If true, will use only a small portion of input data.
+debug_mode <- F # If true, will use only a small portion of input data.
 debug_limit <- 250 # Number of entries to use in debug mode.
 if(debug_mode)
   exec_label <- paste0(exec_label, '_d')
