@@ -2,17 +2,16 @@
 ###### codename: ndc_map
 *_Mapping NDCs to Anatomical Therapeutic Chemical (ATC) Level 5, Veterans' Affairs Drug Classes, MESH Pharmacological Actions, SNOMED Clinical Terms, and other Drug Classification Systems and Terminologies_*
   
-This script provides the drug class (or classes) from a given drug classification system (e.g. ATC) of each FDA National Drug Code (NDC), if any is available by querying the online RxNorm API at https://rxnav.nlm.nih.gov/. The program can read the input NDCs from a flat list (text file, one NDC per line) or from one column in a CSV file.  
-  
-If ATC level 5 is requested, the script will additionally scrape each code's Administration Route, Defined Daily Dose (DDD), and Note (if any) from the official ATC index at https://whocc.no/atc_ddd_index/.  
-  
+This script provides the drug class (or classes) from a given drug classification system (e.g. ATC) of each FDA National Drug Code (NDC), if any is available. It does that by querying the online RxNorm API at https://rxnav.nlm.nih.gov/. This script is just a helper to query the API in bulk and write the resposes to a convenient CSV file -- the mappings themselves are maintained and provided for free by RxNorm. The program can read the input NDCs from a flat list (text file, one NDC per line) or from one column in a CSV file.  
+    
 It is also possible to request:  
 - the generic active ingredients of the NDC, which are independent of drug classification systems,  
 - whether the NDC is a brand name or a generic,  
 - the strength of the drug product (as an unstructured text string),  
 - the SNOMED CT (Clinical Terms) code corresponding to the NDC,  
 - the MESH Pharmacological Actions code corresponding to the NDC,  
-- the Veterans' Affairs Drug Class code corresponding to the NDC.
+- the Veterans' Affairs Drug Class code corresponding to the NDC,  
+- if ATC level 5 is requested, the script will additionally scrape each code's Administration Route, Defined Daily Dose (DDD), and Note (if any) from the website of the official ATC index at https://whocc.no/atc_ddd_index/.  
   
 This work is an update from what was presented as a poster at the 2017 Annual Symposium of the American Medical Informatics Association (AMIA). If you are going to use this script or its NDC <-> drug class maps, please take time to understand the numbers contained in the poster (PDFs are in this repository), because they CAN affect data analyses. At the very minimum, you need to understand the issues regarding coverage (missing codes) and ambiguity (duplication). I have also published a deeper analysis and comparison of drug classification systems in a paper (https://mor.nlm.nih.gov/pubs/pdf/2016-dmmi-fk.pdf). **_TL;DR_**: unless your use case is particularly specific, ATC is the best drug classification for most cases of large dataset analyses. The Veterans' Affairs Drug Classes attain the same high level of coverage of NDCs as ATC, but they don't provide a comprehensive and accessible hierarchy like ATC.  
   
