@@ -36,7 +36,7 @@ If you do not know the R programming language or can't run the code yourself for
 Please feel free to contact me about this work! Reading and reusing code can become so much easier after a quick talk with the original author.  
 Contact me at 191206@kury.dev. **_--Fabrício Kury_**  
   
-Search tags: thesaurus drug class map equivalence correspondance classification
+Search tags: thesaurus drug class map equivalence correspondence classification
   
 #### Do I need the year and month the NDC was used?  
 You do not. The script does not consider dates, only NDCs. Although one same NDC can have been recycled, i.e. represented different drugs at different points in time (https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfcfr/CFRSearch.cfm?fr=207.35, paragraph 4.ii; regulation changed in 2017: https://www.fda.gov/Drugs/GuidanceComplianceRegulatoryInformation/DrugRegistrationandListing/ucm2007058.htm), as far as I have witnessed such situation is exceedingly rare, to the point of being negligible even in nation-wide datasets with over one billion records spanning 10 years of filled prescriptions in U.S. pharmacies.  
