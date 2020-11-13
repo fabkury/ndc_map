@@ -68,8 +68,8 @@ beginProgressReport <- function(job_size, frequency = 0.005, iteration_name = 'i
   assign('progress_report_frequency', frequency, envir = .GlobalEnv)
   assign('progress_report_precision', 1, envir = .GlobalEnv)
   message('Will begin processing ', job_size, ' ', iteration_name, '.')
-  message('This can take a long time! Progress report will happen at ',
-    100*progress_report_frequency, '% rate.')
+  message('This can take a long time! Progress will be reported at every ',
+    100*progress_report_frequency, '% unique NDCs.')
 }
 iterateProgress <- function(housekeep_function = NULL) {
   if(!((progress_report_iterator <<- progress_report_iterator+1)%%max(floor(
