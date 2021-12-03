@@ -13,7 +13,9 @@ It is also possible to request:
 - the Veterans' Affairs Drug Class code corresponding to the NDC,  
 - if ATC level 5 is requested, the script will additionally scrape each code's Administration Route, Defined Daily Dose (DDD), and Note (if any) from the website of the official ATC index at https://whocc.no/atc_ddd_index/.  
   
-This work is an update from what was presented as a poster at the 2017 Annual Symposium of the American Medical Informatics Association (AMIA). If you are going to use this script or its NDC <-> drug class maps, please take time to understand the numbers contained in the poster (PDFs are in this repository), because they CAN affect data analyses. At the very minimum, you need to understand the issues regarding coverage (missing codes) and ambiguity (duplication of codes). I have also published a deeper analysis and comparison of drug classification systems in a paper (https://mor.nlm.nih.gov/pubs/pdf/2016-dmmi-fk.pdf). **_TL;DR_**: unless your use case is particularly specific, ATC is the best drug classification for most cases of large dataset analyses. The Veterans' Affairs Drug Classes attain the same high level of coverage of NDCs as ATC, but they don't provide a comprehensive and accessible hierarchy like ATC.  
+This work is an update from what was presented as a poster at the 2017 Annual Symposium of the American Medical Informatics Association (AMIA). If you are going to use this script or its NDC <-> drug class maps, please take time to understand the numbers contained in the poster (PDFs are in this repository), because they CAN affect data analyses. At the very minimum, you need to understand the issues regarding coverage (missing codes) and ambiguity (duplication of codes).  
+  
+I have also published a deeper analysis and comparison of drug classification systems in a paper (_Desiderata for Drug Classification Systems for their Use in Analyzing Large Drug Prescription Datasets_ -- https://github.com/fabkury/ddcs/blob/master/2016-dmmi-fk.pdf). **_TL;DR_**: unless your use case is particularly specific, ATC is the best drug classification for most cases of large dataset analyses. The Veterans' Affairs Drug Classes attain the same high level of coverage of NDCs as ATC, but they don't provide a comprehensive and accessible hierarchy like ATC.  
   
 #### How to run
 This script should work out of the box if you follow the instructions in the .R  file under the heading "How to execute this script."   
@@ -29,8 +31,10 @@ This script allows you to query for multiple coding systems in the same run (e.g
 #### License
 All contents of this repository are under an Attribution-ShareAlike-NonCommercial 4.0 International license. Please see details at http://creativecommons.org/licenses/by-nc-sa/4.0/.  
   
-#### Pre-made NDC-to-drug class maps
-If you do not know the R programming language or can't run the code yourself for any reason, but need an NDC-to-drug class map for your project, see the folder "FDA NDC Database File with ATC4." The CSV files in there contain all NDCs from the FDA database (https://www.fda.gov/drugs/drug-approvals-and-databases/national-drug-code-directory) with their classes as indicated by the folder and file names. Notice, however, that this file does *not* contain all NDCs you may find in a given dataset. If that doesn't work, and you can send me your list of NDCs, I can easily run the script for you.  
+#### Do you have pre-made NDC-to-drug class maps?
+If you do not know the R programming language or can't run this script yourself for any reason, but need an NDC-to-drug class map for your project, I can offer you two options.  
+One, see the folder "FDA NDC Database File with ATC4." The CSV files in there contain all NDCs from the FDA database (https://www.fda.gov/drugs/drug-approvals-and-databases/national-drug-code-directory) with their classes, as indicated by the folder and file names. **Notice, however, that this file does *not* contain all NDCs you may find in a given dataset, because the NDC Directory does _not_ contain all NDCs that ever existed.**  
+Two, if the above doesn't work, and you are able to send me your list of NDCs (just the NDCs), I can run the script for you. Contact me at github at kury.dev.  
   
 #### Contact the author
 Please feel free to contact me about this work! Reading and reusing code can become so much easier after a quick talk with the original author.  
