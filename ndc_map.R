@@ -38,6 +38,7 @@ library(xml2)
 library(hash)
 library(ratelimitr)
 
+
 # Backbone functions --------------------------------------------------------------------------
 timeformat <- function(ts) format(ts, "%Y_%m_%d %H_%M")
 curtime <- function() timeformat(Sys.time())
@@ -66,16 +67,14 @@ beginProgressReport <- function(job_size, frequency = 0.005, iteration_name = 'i
   assign('progress_report_iterator', 0, envir = .GlobalEnv)
   assign('progress_report_job_size', job_size, envir = .GlobalEnv)
   assign('progress_report_frequency', frequency, envir = .GlobalEnv)
-  assign('progress_report_precision', 1, envir = .GlobalEnv)
   message('Will begin processing ', job_size, ' ', iteration_name, '.')
   message('This can take a long time! Progress will be reported at every ',
     100*progress_report_frequency, '% unique NDCs.')
 }
-iterateProgress <- function(housekeep_function = NULL) {
+iterateProgress <- function(housekeep_function = NULL, skip_wait = FALSE) {
   if(!((progress_report_iterator <<- progress_report_iterator+1)%%max(floor(
     progress_report_job_size*progress_report_frequency), 1))) {
-    message(round(100*progress_report_iterator/progress_report_job_size,
-      progress_report_precision), '%')
+    message(round(100*progress_report_iterator/progress_report_job_size, 1), '%')
     
     if(!is.null(housekeep_function))
       housekeep_function()
@@ -85,7 +84,7 @@ console <- function(...) {
   cat(paste0(..., '\n'))
 }
 wrapRDS <- function(var, exprs, by_name = F, with_exec_label = F, pass_val = F, assign_val = T,
-  rds_dir = def_rds_dir, override = global_rds_override, ignore_rds = global_rds_ignore) {
+  rds_dir = def_rds_dir, override = F) {
   #' This is a handy function to store variables between runs of the code and skip recreating them.
   #' It checks if an RDS file for var already exists in rds_dir. If it does, read it from there. If
   #' it does not, evaluates exprs and saves it to such RDS file.
@@ -104,17 +103,16 @@ wrapRDS <- function(var, exprs, by_name = F, with_exec_label = F, pass_val = F, 
     varname <- deparse(substitute(var))
   rds_file <- paste0(rds_dir, varname,
     ifelse(with_exec_label, paste0(' (', exec_label, ')'), ''), '.rds')
-  if(!ignore_rds && !override && file.exists(rds_file)) {
+  if(!override && file.exists(rds_file)) {
     console("Reading '", varname, "' from file '", rds_file, "'.")
     var_val <- readRDS(rds_file)
   } else {
     var_val <- eval.parent(substitute(exprs), 1)
-    if(!ignore_rds) {
-      console("Saving '", varname, "' to file '", rds_file, "'.")
-      if(!dir.exists(rds_dir))
-        dir.create(rds_dir, recursive = T)
-      saveRDS(var_val, rds_file)
-    }
+    
+    console("Saving '", varname, "' to file '", rds_file, "'.")
+    if(!dir.exists(rds_dir))
+      dir.create(rds_dir, recursive = T)
+    saveRDS(var_val, rds_file)
   }
   if(assign_val)
     assign(varname, var_val, envir = parent.frame(n = 1))
@@ -122,7 +120,7 @@ wrapRDS <- function(var, exprs, by_name = F, with_exec_label = F, pass_val = F, 
     var_val
 }
 keepRDS <- function(var, by_name = F, with_exec_label = F,
-  rds_dir = def_rds_dir, verbose = F, ignore_rds = global_rds_ignore) {
+  rds_dir = def_rds_dir, verbose = F) {
   #' Helper function to create new RDS files, or update existing ones, with calling syntax and file
   #' name compatibles with wrapRDS.
   if(by_name) {
@@ -131,16 +129,15 @@ keepRDS <- function(var, by_name = F, with_exec_label = F,
   } else
     varname <- deparse(substitute(var))
   
-  if(!ignore_rds) {
-    rds_file <- paste0(rds_dir, varname,
-      ifelse(with_exec_label, paste0(' (', exec_label, ')'), ''), '.rds')
-    if(verbose)
-      console("Saving '", varname, "' to file '", rds_file, "'.")
-    tryCatch(saveRDS(var, rds_file),
-      error = function(e) {
-        message('Error saving ', rds_file, ':', e)
-      })
-  }
+  
+  rds_file <- paste0(rds_dir, varname,
+    ifelse(with_exec_label, paste0(' (', exec_label, ')'), ''), '.rds')
+  if(verbose)
+    console("Saving '", varname, "' to file '", rds_file, "'.")
+  tryCatch(saveRDS(var, rds_file),
+    error = function(e) {
+      message('Error saving ', rds_file, ':', e)
+    })
 }
 scope <- function(expr) { 
   # Evaluates expression within a temporary scope/environment.
@@ -157,7 +154,7 @@ tbl_by_row <- function(data, fun) {
 
 # Globals -------------------------------------------------------------------------------------
 # Set working directory to the .R script directory.
-options(stringsAsFactors = F)
+options(stringsAsFactors = FALSE)
 tryCatch(setwd(dirname(sys.frame(1)$ofile)),
   error = function(e) {
     library(rstudioapi)
@@ -165,7 +162,8 @@ tryCatch(setwd(dirname(sys.frame(1)$ofile)),
   })
 
 # Source data with NDCs:
-ndc_master_file <- paste0('../Dados/NDC2017.csv')
+ndc_master_file <- './list_of_ndcs.csv'
+
 # Character used to separate columns in the code_master_file:
 ndc_master_file_separator <- ','
 
@@ -182,7 +180,7 @@ do_ingredients <- FALSE # If true, will request the drug's ingredients from RxNo
 do_ingredients <- do_ingredients | do_atc5 | do_snomedct | do_meshpa
 
 # exec_label can be anything. It serves to isolate multiple runs of the script.
-exec_label <- 'atc5'
+exec_label <- 'atc4'
 
 # The documentation (https://rxnav.nlm.nih.gov/TermOfService.html) allows no more than 20/sec. Let
 # us do 19/sec to be sure.
@@ -190,8 +188,9 @@ RxNorm_query_rate_limit <- 19
 
 error_retry_limit <- 5 # Number of times to retry after error before aborting the whole script.
 error_sleep_seconds <- 10 # Number of seconds to sleep between retries after error.
+minimum_ndc_length <- 8 # Program won't even query the API for NDCs shorter than this.
 
-out_base_dir <- ensureDir('Output/')
+out_base_dir <- ensureDir('output/')
 out_dir <- ensureDir(out_base_dir, exec_label, '/')
 def_rds_dir <- ensureDir(out_base_dir, 'rds/')
 ndc_field <- 'ndc' # ndc field (column)
@@ -199,12 +198,10 @@ ndc_map_random_seed <- 511 # Magic number, intentionally so.
 
 
 # Debug mode ----------------------------------------------------------------------------------
-debug_mode <- F # If true, will use only a small portion of input data.
+debug_mode <- FALSE # If true, will use only a small portion of input data.
 debug_limit <- 250 # Number of entries to use in debug mode.
 if(debug_mode)
   exec_label <- paste0(exec_label, '_d')
-global_rds_override <- F
-global_rds_ignore <- F
 
 
 # Application-specific functions --------------------------------------------------------------
@@ -298,29 +295,6 @@ get_RxCUI_from_ndcstatus <- function(ndc, ndc_path = list()) {
     .set(ndcstatus_hash, keys = ndc, values = rxcui)
   }
   tibble(ndc = rep(ndc, length(ifzero(rxcui))), rxcui = ifzero(rxcui))
-  
-  # This is the old code for picking one RxCUI out of the possibly multiple options.
-  # Good old times of naïvité! True begginner's luck.
-  # ndc_history <- xmlToDataFrame(nodes=ns)
-  # ndc_history$startDate <- as.numeric(as.POSIXct(as.Date(
-  #   paste0(ndc_history$startDate, '01'), '%Y%m%d')))
-  # ndc_history$endDate <- as.numeric(as.POSIXct(as.Date(
-  #   paste0(ndc_history$endDate, '01'), '%Y%m%d')))
-  # ndc_date <- as.numeric(as.POSIXct(as.Date(
-  #   paste0(NDC_info[['YEAR']], NDC_info[['MONTH']], '01'), '%Y%m%d')))
-  # if(ndc_date < min(ndc_history$startDate)) {
-  #   log.early.ndc(NDC_info[['YEAR']], NDC_info[['MONTH']], NDC_info[['NDC']])
-  #   # Pick the earliest RxCUI. If more than one with the same start date, pick the latest end date.
-  #   ndc_history <- ndc_history[order(ndc_history$startDate, -ndc_history$endDate),]
-  # }
-  # else {
-  #   if(nrow(subset(ndc_history, (startDate <= ndc_date) & (endDate >= ndc_date))) > 0)
-  #     ndc_history <- subset(ndc_history, (startDate <= ndc_date) & (endDate >= ndc_date))
-  #   # Pick the latest RxCUI. If more than one with the same start date, pick the latest end date.
-  #   ndc_history <- ndc_history[order(-ndc_history$startDate, -ndc_history$endDate),]
-  # }
-  # rxcui <- as.character(if(nchar(as.character(ndc_history[[1, 'activeRxcui']])) > 3)
-  #   ndc_history[[1, 'activeRxcui']] else ndc_history[[1, 'originalRxcui']])
 }
 
 get_attributes <- function(drug_product) {
@@ -566,28 +540,29 @@ get_code_classes <- function(ndc, attributes = do_attributes, va = do_va,
 }
 
 tally_mapping_rates <- function(ndc_map, colname) {
-  # TODO: Implement this function.
+  message('\nTallying ', colname, ':')
   
   # Rows missing colname
   console(sum(is.na(ndc_map[, colname])), ' (',
     round(100*sum(is.na(ndc_map[, colname]))/nrow(ndc_map), 1),
     '%) rows have no ', colname, ' value.')
   
-  # NDCs partially and completely unmapped
-  unique_ndc_count <- length(unique(ndc_map[[ndc_field]]))
-  unmapped_ndcs <- unique(ndc_map[is.na(ndc_map[[colname]]), ndc_field])
-  mapped_ndcs <- unique(ndc_map[!is.na(ndc_map[[colname]]), ndc_field])
-  ndc_intersect_count <- length(intersect(unmapped_ndcs, mapped_ndcs))
-  mapped_ndc_count <- length(mapped_ndcs[[ndc_field]]) - ndc_intersect_count
-  unmapped_ndc_count <- length(unmapped_ndcs[[ndc_field]]) - ndc_intersect_count
-  console('The original data contained ', unique_ndc_count, ' NDCs:')
-  console(mapped_ndc_count, ' (', round(100*mapped_ndc_count/unique_ndc_count, 1), '%) ',
-    'were fully mapped to ', colname, '.')
-  console(unmapped_ndc_count, ' (', round(100*unmapped_ndc_count/unique_ndc_count, 1), '%) ',
-    'remain fully unmapped to ', colname, '.')
-  console(ndc_intersect_count, ' (', round(100*ndc_intersect_count/unique_ndc_count, 1), '%) ',
-    'contain >=1 ingredient and >=1 was mapped while >=1 was not.')
+  # NDCs partially and completely unmapped. Partially unmapped means it maps to multiple RxCUIs and not all of them
+  # have at least one ATC class.
+  unique_n <- length(unique(ndc_map[[ndc_field]]))
+  unmapped_ndcs <- unique(ndc_map[is.na(ndc_map[[colname]]),][[ndc_field]])
+  mapped_ndcs <- unique(ndc_map[!is.na(ndc_map[[colname]]),][[ndc_field]])
+  intersect_n <- length(intersect(unmapped_ndcs, mapped_ndcs))
+  mapped_n <- length(mapped_ndcs) - intersect_n
+  unmapped_n <- length(unmapped_ndcs) - intersect_n
+  console('The original data contained ', unique_n, ' NDCs:')
+  console(mapped_n, ' (', round(100*mapped_n/unique_n, 1), '%) ', 'were fully mapped to ', colname, '.')
+  console(unmapped_n, ' (', round(100*unmapped_n/unique_n, 1), '%) ', 'remain fully unmapped to ', colname, '.')
+  if(intersect_n > 0)
+    console(intersect_n, ' (', round(100*intersect_n/unique_n, 1), '%) ',
+      'contain >=1 ingredient and >=1 was mapped while >=1 was not.')
 }
+
 
 # Execution start ---------------------------------------------------------------------------
 exec_start_time <- Sys.time()
@@ -595,6 +570,7 @@ console('Script execution started at ', timeformat(exec_start_time),
   ' with label: ', exec_label, '.')
 old_option_expressions <- getOption('expressions')
 options(expressions = 5e5)
+
 
 # Load and preprocess input -----------------------------------------------------------------
 # Read the master list of ndcs
@@ -623,6 +599,16 @@ wrapRDS(ndc_master, {
   master_source_ndc_column <- min(which(grepl('ndc', names(master_source), fixed = T)))
   ndc_master <- master_source[master_source_ndc_column]
   names(ndc_master) <- ndc_field
+  
+  misformed_entries <- nchar(ndc_master[[ndc_field]]) < minimum_ndc_length
+  if(any(misformed_entries)) {
+    console('Found ', sum(misformed_entries), ' NDC entries with less than ', minimum_ndc_length, ' characters. ',
+      'This is considered misformed input and will be removed from the data.')
+    ndc_master <- ndc_master[!misformed_entries,]
+    if(nrow(ndc_master) == 0)
+      stop('Error: no entries left to process.')
+  }
+  
   ndc_master
 })
 
@@ -641,30 +627,6 @@ if(debug_mode) {
   message('Done.')
 }
 
-if(F) {
-  selected_entries <- nchar(ndc_master[[ndc_field]]) < 7
-  if(any(selected_entries)) {
-    console('Found ', sum(selected_entries), ' NDC entries with less than 7 characters. ',
-      'Considered as misformed input and removed from the data.')
-    ndc_master <- ndc_master[!selected_entries, ]
-    if(!nrow(ndc_master))
-      stop('Error: no rows left to process.')
-  }
-  remove(selected_entries)
-  
-  #' If NDC11 with no hyphens, add hyphens. For the NDCs with 2 hyphens, cut the last part (the
-  #' packaging) to create the "labeler-product" code, i.e. the first two segments of NDC.
-  ndc_master$code <- vapply(ndc_master[[ndc_field]],
-    function(ndc) {
-      if(grepl('-', substr(ndc, nchar(ndc)-2, nchar(ndc)-1), fixed = T))
-        substr(ndc, 1, max(unlist(gregexpr('-', ndc, fixed = T)))-1)
-      else if(nchar(gsub('\\D', '', ndc)) == 11 && !grepl('-', ndc, fixed = T))
-        paste0(substr(ndc, 1, 5), '-', substr(ndc, 6, 9))
-      else
-        ndc
-    }, character(1))
-}
-
 #' Make code_master the one that will actually be used for mapping. The results get later joined to
 #' the ndc_master.
 code_master <- unique(ndc_master[[ndc_field]])
@@ -673,116 +635,105 @@ console('Found ', length(code_master), ' unique NDCs.')
 
 # Produce the map -----------------------------------------------------------------------------
 # Query RxNorm, that is, perform the mapping.
-if(T) {
-  wrapRDS(ndcproperties_hash, hash())
-  wrapRDS(ndcstatus_hash, hash())
+wrapRDS(ndcproperties_hash, hash())
+wrapRDS(ndcstatus_hash, hash())
+if(do_attributes)
+  wrapRDS(attributes_hash, hash())
+if(do_va)
+  wrapRDS(va_hash, hash())
+if(do_ingredients)
+  wrapRDS(ingredient_hash, hash())
+if(do_atc5) {
+  require(rvest)
+  wrapRDS(atc5_hash, hash())
+  wrapRDS(atc_attributes_hash, hash())
+}
+if(do_atc4)
+  wrapRDS(atc4_hash, hash())
+if(do_meshpa)
+  wrapRDS(meshpa_hash, hash())
+if(do_snomedct)
+  wrapRDS(snomedct_hash, hash())
+
+update_all_rds <- function() {
+  keepRDS(ndcproperties_hash)
+  keepRDS(ndcstatus_hash)
   if(do_attributes)
-    wrapRDS(attributes_hash, hash())
+    keepRDS(attributes_hash)
   if(do_va)
-    wrapRDS(va_hash, hash())
+    keepRDS(va_hash)
   if(do_ingredients)
-    wrapRDS(ingredient_hash, hash())
+    keepRDS(ingredient_hash)
   if(do_atc5) {
-    require(rvest)
-    wrapRDS(atc5_hash, hash())
-    wrapRDS(atc_attributes_hash, hash())
+    keepRDS(atc5_hash)
+    keepRDS(atc_attributes_hash)
   }
   if(do_atc4)
-    wrapRDS(atc4_hash, hash())
+    keepRDS(atc4_hash)
   if(do_meshpa)
-    wrapRDS(meshpa_hash, hash())
+    keepRDS(meshpa_hash)
   if(do_snomedct)
-    wrapRDS(snomedct_hash, hash())
-  
-  update_all_rds <- function() {
-    keepRDS(ndcproperties_hash)
-    keepRDS(ndcstatus_hash)
-    if(do_attributes)
-      keepRDS(attributes_hash)
-    if(do_va)
-      keepRDS(va_hash)
-    if(do_ingredients)
-      keepRDS(ingredient_hash)
-    if(do_atc5) {
-      keepRDS(atc5_hash)
-      keepRDS(atc_attributes_hash)
-    }
-    if(do_atc4)
-      keepRDS(atc4_hash)
-    if(do_meshpa)
-      keepRDS(meshpa_hash)
-    if(do_snomedct)
-      keepRDS(snomedct_hash)
-  }
-  
-  #' This function wrapper below is used to cap the number of queries to RxNorm per second. The
-  #' functions inside get_code_classes() use this paste0 instead of the standard one to assemble the
-  #' query strings (web addresses). In addition, for convenience, it also adds the base address.
-  paste0RxNormQuery <- limit_rate(function(...) {
-      paste0('https://rxnav.nlm.nih.gov/REST/', ...)
-    }, rate(n=RxNorm_query_rate_limit, period = 1))
-  
-  i <- as.integer(0)
-  error_retry_count <- 0
-  code_count <- length(code_master)
-  code_map <- vector("list", code_count)
-  beginProgressReport(code_count)
-  while(i < code_count) {
-    i <- i + 1
-    iterateProgress(update_all_rds)
-    code <- code_master[[i]]
-    tryCatch({
-      code_map[[i]] <- get_code_classes(code)
-      error_retry_count <<- 0
-      }, error = function(e) {
-        error_retry_count <<- error_retry_count + 1
-        if(error_retry_count < error_retry_limit) {
-          message('Error: ', e)
-          message('Will retry code ', code, '.')
-          i <<- i - 1
-        }
-        else if(error_retry_count == error_retry_limit) {
-          message('WARNING: Retry limit reached. Will move to the next code.')
-          Sys.sleep(error_sleep_seconds)
-          error_retry_count <- 0
-        }
-      }
-    )
-  }
-  code_map <- bind_rows(code_map)
-  remove(i)
-  remove(paste0RxNormQuery)
-  update_all_rds()
+    keepRDS(snomedct_hash)
 }
+
+#' This function wrapper below is used to cap the number of queries to RxNorm per second. The
+#' functions inside get_code_classes() use this paste0 instead of the standard one to assemble the
+#' query strings (web addresses). In addition, for convenience, it also adds the base address.
+paste0RxNormQuery <- limit_rate(function(...) {
+    paste0('https://rxnav.nlm.nih.gov/REST/', ...)
+  }, rate(n=RxNorm_query_rate_limit, period = 1))
+
+i <- as.integer(0)
+error_retry_count <- 0
+code_count <- length(code_master)
+code_map <- vector("list", code_count)
+beginProgressReport(code_count)
+while(i < code_count) {
+  i <- i + 1
+  iterateProgress(update_all_rds)
+  code <- code_master[[i]]
+  tryCatch({
+    code_map[[i]] <- get_code_classes(code)
+    error_retry_count <<- 0
+    }, error = function(e) {
+      error_retry_count <<- error_retry_count + 1
+      if(error_retry_count < error_retry_limit) {
+        message('Error: ', e)
+        message('Will retry code ', code, '.')
+        i <<- i - 1
+      }
+      else if(error_retry_count == error_retry_limit) {
+        message('WARNING: Retry limit reached. Will move to the next code.')
+        Sys.sleep(error_sleep_seconds)
+        error_retry_count <- 0
+      }
+    }
+  )
+}
+code_map <- bind_rows(code_map)
+remove(i)
+remove(paste0RxNormQuery)
+update_all_rds()
 
 # Join the map to the original ndc master table
-if(T) {
-  ndc_map <- left_join(ndc_master, code_map, by = 'ndc')
-  remove(ndc_master)
-  ndc_map <- ndc_map[order(ndc_map[[ndc_field]]),]
-}
+ndc_map <- left_join(ndc_master, code_map, by = 'ndc')
+remove(ndc_master)
+ndc_map <- ndc_map[order(ndc_map[[ndc_field]]),]
 
 # Write the final map to a CSV file.
-if(T) {
-  map_outfile <- paste0(out_dir, 'ndc_map ', curtime(), ' (', exec_label, ').csv')
-  console('Writing NDC map to file ', map_outfile, '.')
-  write.csv(ndc_map, map_outfile, row.names = F)
-  remove(map_outfile)
-  console('Completed.')
-}
+map_outfile <- paste0(out_dir, 'ndc_map ', curtime(), ' (', exec_label, ').csv')
+console('Writing NDC map to file ', map_outfile, '.')
+write.csv(ndc_map, map_outfile, row.names = F)
+remove(map_outfile)
+console('Completed.')
 
 
 # Analyze the map -----------------------------------------------------------------------------
-if(T) {
-  console('The final map has ', nrow(ndc_map), ' rows.')
-  invisible(lapply(c('atc5', 'atc4', 'va', 'meshpa', 'snomedct'),
-    function(classname) {
-      if(classname %in% names(ndc_map)) {
-        message('\nTallying ', classname, ':')
-        tally_mapping_rates(ndc_map, classname)
-      }
-    }))
-}
+console('The final map has ', nrow(ndc_map), ' rows.')
+invisible(
+  lapply(intersect(c('atc5', 'atc4', 'va', 'meshpa', 'snomedct'), names(ndc_map)),
+    tally_mapping_rates, ndc_map = ndc_map)
+)
 
 
 # Execution end -------------------------------------------------------------------------------
@@ -791,4 +742,3 @@ remove(old_option_expressions)
 exec_end_time <- Sys.time()
 console('Script execution completed at ', timeformat(exec_end_time), '. ')
 print(round(exec_end_time-exec_start_time, 1))
-
