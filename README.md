@@ -34,7 +34,7 @@ All contents of this repository are under an Attribution-ShareAlike-NonCommercia
 #### Do you have pre-made NDC-to-drug class maps?
 If you do not know the R programming language or can't run this script yourself for any reason, but need an NDC-to-drug class map for your project, I can offer you two options.  
 One, see the folder "FDA NDC Database File with ATC4." The CSV files in there contain all NDCs from the FDA database (https://www.fda.gov/drugs/drug-approvals-and-databases/national-drug-code-directory) with their classes, as indicated by the folder and file names. **Notice, however, that this file does *not* contain all NDCs you may find in a given dataset, because the NDC Directory does _not_ contain all NDCs that ever existed.**  
-Two, if the above doesn't work, and you are able to send me your list of NDCs (just the NDCs), I can run the script for you. Contact me at github at kury.dev.  
+Two, if the above doesn't work, and you are able to send me your list of NDCs (just the NDCs), I can run the script for you. Contact me at 191206@kury.dev.  
   
 #### Contact the author
 Please feel free to contact me about this work! Reading and reusing code can become so much easier after a quick talk with the original author.  
