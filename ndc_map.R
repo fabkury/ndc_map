@@ -8,7 +8,7 @@
 ##
 
 #' HOW TO RUN THIS SCRIPT:
-#' First, make sure the code_master_file variable is pointing to the input file containing NDCs. That
+#' First, make sure the ndc_master_file variable is pointing to the input file containing NDCs. That
 #' file can be either:
 #'   - the package.txt from the FDA (https://www.fda.gov/Drugs/InformationOnDrugs/ucm142438.htm),
 #'   - a CSV file containing a column called "NDC",
@@ -164,7 +164,7 @@ tryCatch(setwd(dirname(sys.frame(1)$ofile)),
 # Source data with NDCs:
 ndc_master_file <- './list_of_ndcs.csv'
 
-# Character used to separate columns in the code_master_file:
+# Character used to separate columns in the ndc_master_file:
 ndc_master_file_separator <- ','
 
 # Request codes by making the do_* variables TRUE.
