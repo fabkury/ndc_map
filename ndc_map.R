@@ -579,7 +579,7 @@ wrapRDS(ndc_master, {
   ndc_master_line_1 <- read_lines(ndc_master_file, n_max = 1)
   # Assume the file is the package.txt file from the FDA NDC Directory.
   if(grepl('NDCPACKAGECODE', ndc_master_line_1, fixed = T)) {
-    master_source <- read_delim(ndc_master_file, delim = '\t', col_names = TRUE,
+    master_source <- read_delim(ndc_master_file, delim = ndc_master_file_separator, col_names = TRUE,
       col_types = cols_only(NDCPACKAGECODE = "c"), n_max = ifelse(debug_mode, debug_limit, Inf))
   } else if(grepl('ndc', tolower(ndc_master_line_1), fixed = T)) {
     #' Assume the file is a character-delimited tabular file, with colum headers, containing a
