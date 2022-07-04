@@ -8,8 +8,12 @@
 ##
 
 #' HOW TO RUN THIS SCRIPT:
-#' First, make sure the ndc_master_file variable is pointing to the input file containing NDCs. That
-#' file can be either:
+#' First, make sure the ndc_master_file variable is pointing to the input file containing NDCs, and
+#' that ndc_master_file_separator contains the correct character separating fields in your input file.
+#' Most likely the separator is comma ',', but can also be semicolon ';' or tab '\t'. To figure out
+#' what is the separator, simply open the file in a text editor (e.g. Notepad), and see what character
+#' is separating the columns.
+#' The ndc_master_file file can be either:
 #'   - the package.txt from the FDA (https://www.fda.gov/Drugs/InformationOnDrugs/ucm142438.htm),
 #'   - a CSV file containing a column called "NDC",
 #'   - a flat list of NDCs, one per line.
