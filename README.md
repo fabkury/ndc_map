@@ -20,6 +20,11 @@ I have also published a deeper analysis and comparison of drug classification sy
 #### How to run
 This script should work out of the box if you follow the instructions in the .R  file under the heading "How to execute this script."   
   
+#### But I just need the NDC-to-drug class map file! Do you have pre-made maps?
+If you cannot run this script yourself for any reason, but need an NDC-to-drug class map for your project, I can offer you two options.  
+ - One, see the folder "FDA NDC Database File with ATC4." The CSV files in there contain all NDCs from the FDA database (https://www.fda.gov/drugs/drug-approvals-and-databases/national-drug-code-directory) with their classes, as indicated by the folder and file names. **Notice, however, that this file does *not* contain all NDCs you may find in a given dataset, because the NDC Directory does _not_ contain all NDCs that ever existed.**  
+ - Two, I can run the script for you if you are able to send me your list of NDCs. Over time many people have approached me with such request, as well as their questions about working with NDCs and drug classes. I am happy to help. Contact me at 191206@kury.dev.  
+  
 #### Contributing to this script
 There are extra features that could be implemented. See the TODOs in the .R file.  
   
@@ -31,11 +36,6 @@ This script allows you to query for multiple coding systems in the same run (e.g
   
 #### License
 All contents of this repository are under an Attribution-ShareAlike-NonCommercial 4.0 International license. Please see details at http://creativecommons.org/licenses/by-nc-sa/4.0/.  
-  
-#### Do you have pre-made NDC-to-drug class maps?
-If you do not know the R programming language or can't run this script yourself for any reason, but need an NDC-to-drug class map for your project, I can offer you two options.  
-One, see the folder "FDA NDC Database File with ATC4." The CSV files in there contain all NDCs from the FDA database (https://www.fda.gov/drugs/drug-approvals-and-databases/national-drug-code-directory) with their classes, as indicated by the folder and file names. **Notice, however, that this file does *not* contain all NDCs you may find in a given dataset, because the NDC Directory does _not_ contain all NDCs that ever existed.**  
-Two, I can run the script for you if you are able to send me your list of NDCs. Over time many people have approached me with such request, as well as their questions about working with NDCs and drug classes. Contact me at 191206@kury.dev.  
   
 #### Contact the author
 Please feel free to contact me about this work! Reading and using someone else's code can become so much easier after a quick conversation.  
