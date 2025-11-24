@@ -2,7 +2,7 @@
 ###### codename: ndc_map
 *_Mapping NDCs to Anatomical Therapeutic Chemical (ATC) Level 5, Veterans' Affairs Drug Classes, MESH Pharmacological Actions, SNOMED Clinical Terms, and other Drug Classification Systems and Terminologies_*
 
-## **!!! THIS SCRIPT IS DEPRECATED. PLEASE SEE A MORE MODERN PYTHON SCRIPT AT https://github.com/fabkury/n2c !!!**
+### **THIS SCRIPT IS DEPRECATED AND MAY NOT ALWAYS WORK. PLEASE USE THE MORE MODERN PYTHON SCRIPT AT https://github.com/fabkury/n2c**
   
 This script provides the drug class (or classes) from a given drug classification system (e.g. ATC) of each FDA National Drug Code (NDC), if any is available. It does that by querying the online RxNorm API at https://rxnav.nlm.nih.gov/. This script is just a helper to query the API in bulk and write the resposes to a convenient CSV file -- the mappings themselves are maintained and provided for free by RxNorm. The program can read the input NDCs from a flat list (text file, one NDC per line) or from one column in a CSV file.  
     
